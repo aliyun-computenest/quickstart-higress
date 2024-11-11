@@ -1,7 +1,7 @@
 ROSTemplateFormatVersion: '2015-09-01'
 Description:
-  en: Source Code Service Ros Template
-  zh-cn: 源代码服务模板
+  en: DockerCompose service template
+  zh-cn: DockerCompose服务模板
 Conditions:
   CreateVpcConditions:
     Fn::Equals:
@@ -176,12 +176,12 @@ Parameters:
     Label:
       en: VSwitch ID
       zh-cn: 交换机实例ID
+    Default: ''
     AssociationProperty: 'ALIYUN::ECS::VSwitch::VSwitchId'
     Required:
       Fn::Equals:
         - ExistingVPC
         - ${VpcOption}
-    Default: ''
     AssociationPropertyMetadata:
       VpcId: VpcId
       ZoneId: ZoneId
@@ -229,6 +229,11 @@ Resources:
           SourceCidrIp: 0.0.0.0/0
           IpProtocol: tcp
           NicType: internet
+        - PortRange: 8080/8080
+          Priority: 1
+          SourceCidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          NicType: internet
   InstanceGroup:
     Type: ALIYUN::ECS::InstanceGroup
     Properties:
@@ -245,7 +250,7 @@ Resources:
           - Ref: EcsVpc
           - Ref: VpcId
       VSwitchId:
-        'Fn::If':
+        Fn::If:
           - CreateVpcConditions
           - Ref: EcsVSwitch
           - Ref: VSwitchId
@@ -253,7 +258,7 @@ Resources:
         Ref: ZoneId
       SecurityGroupId:
         Ref: SecurityGroup
-      ImageId: "{{resolve:oos:aliyun/services/ecs/images/linux/centos-latest/centos_7_9_x64}}"
+      ImageId: "{{resolve:oos:aliyun/services/computenest/images/aliyun_3_2104_docker_compose_2_27_compute_nest}}"
       Password:
         Ref: InstancePassword
       InstanceType:
@@ -268,19 +273,15 @@ Resources:
     Properties:
       InstanceIds:
         Fn::GetAtt:
-        - InstanceGroup
-        - InstanceIds
+          - InstanceGroup
+          - InstanceIds
       Type: RunShellScript
       Sync: true
       Timeout: 3600
       CommandContent:
         Fn::Sub:
           - |
-            #!/bin/bash
-            # 源代码通过computenest-cli被打包为tar.gz包，并发布为部署物
-            wget '{{ computenest::file::hanans426_quickstart-higress }}' -O hanans426_quickstart-higress.tar.gz > /var/log/download.log
-            tar -zxvf hanans426_quickstart-higress.tar.gz && cd "$(tar -tzf hanans426_quickstart-higress.tar.gz | head -1 | awk -F'/' '{print $1}')"
-            ./bin/configure.sh -a -r  --use-builtin-nacos --nacos-port=8848 --gateway-http-port=80 --gateway-https-port=443 --gateway-metrics-port=15020 --console-port=8080
+            curl -fsSL https://higress.io/standalone/get-higress.sh | bash -s ../higress -a -r --use-builtin-nacos --nacos-port=8848 --gateway-http-port=80 --gateway-https-port=443 --gateway-metrics-port=15020 --console-port=8080
 
             ARGUS_VERSION=3.5.7 /bin/bash -c "$(curl -sS https://cms-agent-${RegionId}.oss-${RegionId}-internal.aliyuncs.com/Argus/agent_install_ecs-1.7.sh)" >> /root/install_cms_agent.log 2>&1
           - RegionId:
@@ -292,13 +293,13 @@ Outputs:
       zh-cn: 访问页面。
     Value:
       Fn::Sub:
-        - http://${ServerAddress}:80
+        - 'http://${ServerAddress}:8080'
         - ServerAddress:
             Fn::Select:
-            - 0
-            - Fn::GetAtt:
-              - InstanceGroup
-              - PublicIps
+              - 0
+              - Fn::GetAtt:
+                  - InstanceGroup
+                  - PublicIps
 Metadata:
   ALIYUN::ROS::Interface:
     ParameterGroups:
@@ -307,14 +308,12 @@ Metadata:
           - PayPeriodUnit
           - PayPeriod
         Label:
-          zh-cn: 付费类型配置
-          en: Payment Type Configuration
+          default: 付费类型配置
       - Parameters:
           - EcsInstanceType
           - InstancePassword
         Label:
-          zh-cn: 资源配置
-          en: Resources Configuration
+          default: 资源配置
       - Parameters:
           - ZoneId
           - VpcOption
@@ -323,6 +322,4 @@ Metadata:
           - VpcCidrBlock
           - VSwitchCidrBlock
         Label:
-          zh-cn: 可用区配置
-          en: Availability Zone Configuration
-      
+          default: 可用区配置
