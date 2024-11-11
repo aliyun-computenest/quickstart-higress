@@ -1,0 +1,1 @@
+{"ServiceType":"private","AllowedRegions":["cn-hangzhou","cn-shanghai","cn-beijing"],"ArtifactSourceType":"DockerCompose","RepoName":"hanans426/quickstart-higress","Arch":"EcsSingle","DockerComposeEnvPath":"higress-standalone-2.0.3/compose/.env","RegionId":"cn-hangzhou","DockerComposeYamlPath":"higress-standalone-2.0.3/compose/docker-compose.yml"}
