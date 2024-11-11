@@ -1,7 +1,7 @@
 ROSTemplateFormatVersion: '2015-09-01'
 Description:
-  en: DockerCompose service template
-  zh-cn: DockerCompose服务模板
+  en: Source Code Service Ros Template
+  zh-cn: 源代码服务模板
 Conditions:
   CreateVpcConditions:
     Fn::Equals:
@@ -176,12 +176,12 @@ Parameters:
     Label:
       en: VSwitch ID
       zh-cn: 交换机实例ID
-    Default: ''
     AssociationProperty: 'ALIYUN::ECS::VSwitch::VSwitchId'
     Required:
       Fn::Equals:
         - ExistingVPC
         - ${VpcOption}
+    Default: ''
     AssociationPropertyMetadata:
       VpcId: VpcId
       ZoneId: ZoneId
@@ -224,32 +224,7 @@ Resources:
           - Ref: EcsVpc
           - Ref: VpcId
       SecurityGroupIngress:
-        - PortRange: -8848}/-8848}
-          Priority: 1
-          SourceCidrIp: 0.0.0.0/0
-          IpProtocol: tcp
-          NicType: internet
-        - PortRange: -9848}/-9848}
-          Priority: 1
-          SourceCidrIp: 0.0.0.0/0
-          IpProtocol: tcp
-          NicType: internet
-        - PortRange: -80}/-80}
-          Priority: 1
-          SourceCidrIp: 0.0.0.0/0
-          IpProtocol: tcp
-          NicType: internet
-        - PortRange: -443}/-443}
-          Priority: 1
-          SourceCidrIp: 0.0.0.0/0
-          IpProtocol: tcp
-          NicType: internet
-        - PortRange: -15020}/-15020}
-          Priority: 1
-          SourceCidrIp: 0.0.0.0/0
-          IpProtocol: tcp
-          NicType: internet
-        - PortRange: -8080}/-8080}
+        - PortRange: 80/80
           Priority: 1
           SourceCidrIp: 0.0.0.0/0
           IpProtocol: tcp
@@ -278,7 +253,7 @@ Resources:
         Ref: ZoneId
       SecurityGroupId:
         Ref: SecurityGroup
-      ImageId: "{{resolve:oos:aliyun/services/computenest/images/aliyun_3_2104_docker_compose_2_27_compute_nest}}"
+      ImageId: "{{resolve:oos:aliyun/services/ecs/images/linux/centos-latest/centos_7_9_x64}}"
       Password:
         Ref: InstancePassword
       InstanceType:
@@ -301,37 +276,13 @@ Resources:
       CommandContent:
         Fn::Sub:
           - |
-            dockerJson='{{ computenest::acr::dockerconfigjson }}'
-            decodeDockerJson=$(echo $dockerJson | base64 -d)
-            host=$(echo $decodeDockerJson | jq '.auths' | jq 'keys' | jq .[0])
-            username=$(echo $decodeDockerJson | jq ".auths.$host.username" | tr -d '"')
-            password=$(echo $decodeDockerJson | jq ".auths.$host.password" | tr -d '"')
-            host=$(echo $host | tr -d '"')
-            docker login $host --username=$username --password=$password
+            #!/bin/bash
+            # 源代码通过computenest-cli被打包为tar.gz包，并发布为部署物
+            wget '{{ computenest::file::hanans426_quickstart-higress }}' -O hanans426_quickstart-higress.tar.gz > /var/log/download.log
+            tar -zxvf hanans426_quickstart-higress.tar.gz && cd "$(tar -tzf hanans426_quickstart-higress.tar.gz | head -1 | awk -F'/' '{print $1}')"
+            ./bin/configure.sh -a -r  --use-builtin-nacos --nacos-port=8848 --gateway-http-port=80 --gateway-https-port=443 --gateway-metrics-port=15020 --console-port=8080
 
-            wget '{{ computenest::file::hanans426_quickstart-higress-docker-compose }}' -O /root/application/docker_compose.tar
-            tar -xvf /root/application/docker_compose.tar -C /root/application
-
-            cat > /etc/systemd/system/docker-compose-app.service <<EOF
-            [Unit]
-            Description=Docker Compose Application Service
-            Requires=docker.service
-            After=docker.service
-
-            [Service]
-            Type=oneshot
-            RemainAfterExit=yes
-            WorkingDirectory=/root/application/docker_compose
-            ExecStart=/usr/bin/docker compose -f higress-standalone-2.0.3/compose/docker-compose.yml up -d
-            ExecStop=/usr/bin/docker compose down
-            TimeoutStartSec=0
-
-            [Install]
-            WantedBy=multi-user.target
-            EOF
-
-            
-            systemctl start docker-compose-app
+            ARGUS_VERSION=3.5.7 /bin/bash -c "$(curl -sS https://cms-agent-${RegionId}.oss-${RegionId}-internal.aliyuncs.com/Argus/agent_install_ecs-1.7.sh)" >> /root/install_cms_agent.log 2>&1
           - RegionId:
               Ref: ALIYUN::Region
 Outputs:
@@ -341,7 +292,7 @@ Outputs:
       zh-cn: 访问页面。
     Value:
       Fn::Sub:
-        - http://${ServerAddress}:-8848}, http://${ServerAddress}:-9848}, http://${ServerAddress}:-80}, http://${ServerAddress}:-443}, http://${ServerAddress}:-15020}, http://${ServerAddress}:-8080}
+        - http://${ServerAddress}:80
         - ServerAddress:
             Fn::Select:
             - 0
@@ -356,12 +307,14 @@ Metadata:
           - PayPeriodUnit
           - PayPeriod
         Label:
-          default: 付费类型配置
+          zh-cn: 付费类型配置
+          en: Payment Type Configuration
       - Parameters:
           - EcsInstanceType
           - InstancePassword
         Label:
-          default: 资源配置
+          zh-cn: 资源配置
+          en: Resources Configuration
       - Parameters:
           - ZoneId
           - VpcOption
@@ -370,5 +323,6 @@ Metadata:
           - VpcCidrBlock
           - VSwitchCidrBlock
         Label:
-          default: 可用区配置
+          zh-cn: 可用区配置
+          en: Availability Zone Configuration
       
