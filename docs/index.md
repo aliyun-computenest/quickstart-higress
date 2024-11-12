@@ -3,13 +3,7 @@
 ## 概述
 
 
-Higress 是一款云原生 API 网关，内核基于 Istio 和 Envoy，可以用 Go/Rust/JS 等编写 Wasm 插件，提供了数十个现成的通用插件，以及开箱即用的控制台。
-
-Higress 在阿里内部为解决 Tengine reload 对长连接业务有损，以及 gRPC/Dubbo 负载均衡能力不足而诞生。
-
-阿里云基于 Higress 构建了云原生 API 网关产品，为大量企业客户提供 99.99% 的网关高可用保障服务能力。
-
-Higress 基于 AI 网关能力，支撑了通义千问 APP、百炼大模型 API、机器学习 PAI 平台等 AI 业务。同时服务国内头部的 AIGC 企业（如零一万物），以及 AI 产品（如 FastGPT）
+   Higress 是一款云原生 API 网关，内核基于 Istio 和 Envoy，可以用 Go/Rust/JS 等编写 Wasm 插件，提供了数十个现成的通用插件，以及开箱即用的控制台。Higress 在阿里内部为解决 Tengine reload 对长连接业务有损，以及 gRPC/Dubbo 负载均衡能力不足而诞生。阿里云基于 Higress 构建了云原生 API 网关产品，为大量企业客户提供 99.99% 的网关高可用保障服务能力。Higress 基于 AI 网关能力，支撑了通义千问 APP、百炼大模型 API、机器学习 PAI 平台等 AI 业务。同时服务国内头部的 AIGC 企业（如零一万物），以及 AI 产品（如 FastGPT）。
 
 
 
@@ -61,12 +55,12 @@ One Api服务需要对ECS、VPC等资源进行访问和创建操作，若您使�
    ![img_4.png](img4.png)
 3. 设置完参数后，点击下一步确认订单，点击立即创建，等待服务实例创建完成。
 4. 服务实例创建成功后，进入服务实例详情页。在概览页可获取Higress的登录信息。
-   ![img_5.png](img_5.png)
+   ![img_5.png](img5.png)
 
 ### 验证结果
 
  点击链接可进入Higress的控制台，根据提示登录之后即可开始使用。
- ![img_6.png](img_6.png)
+ ![img_6.png](img6.png)
 
 
 <div style="margin-top: 20px;">
