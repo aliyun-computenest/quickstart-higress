@@ -7,7 +7,79 @@ Conditions:
     Fn::Equals:
       - NewVPC
       - Ref: VpcOption
+  UseSelfHostedNacosCondition:
+    Fn::Equals:
+      - Ref: UseSelfHostedNacos
+      - true
+  NacosHasAuthCondition:
+    Fn::Equals:
+      - Ref: NacosHasAuth
+      - true
 Parameters:
+  UseSelfHostedNacos:
+    Label:
+      en: Use self hosted nacos.
+      zh-cn: 使用独立部署的Nacos服务.
+    Description:
+      en: If you do not use the standalone Nacos service, the built-in Nacos service will be enabled. It is recommended to use the standalone Nacos service in production environments.
+      zh-cn: 若不使用独立部署的Nacos服务，会启用内置的Nacos服务，生产环境建议使用独立部署的Nacos服务.
+    Default: false
+    Type: Boolean
+  NacosHost:
+    Label:
+      en: Nacos service ip.
+      zh-cn: Nacos服务的IP
+    Description:
+      en: Make sure Nacos services are accessible.
+      zh-cn: 输入Nacos服务的ip地址，例如：192.168.0.1。请确保Nacos服务可访问, 且版本不低于2.0.0。
+    Type: String
+    Default: null
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${UseSelfHostedNacos}
+            - true
+  NacosHasAuth:
+    Label:
+      en: Nacos service enabled for authentication.
+      zh-cn: Nacos服务是否开启认证.
+    Description:
+      en: If Nacos service is enabled with authentication, you need to input the username and password to access Nacos.
+      zh-cn: 若Nacos服务开启认证，需要输入访问Nacos的用户名和密码。
+    Default: false
+    Type: Boolean
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${UseSelfHostedNacos}
+            - true
+  NacosUserName:
+    Label:
+      en: Nacos user name.
+      zh-cn: 访问Nacos服务的用户名
+    Type: String
+    Default: null
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${NacosHasAuth}
+            - true
+  NacosUserPassword:
+    Label:
+      en: Nacos user Password.
+      zh-cn: 访问Nacos服务的密码
+    Type: String
+    Default: null
+    NoEcho: true
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          Fn::Equals:
+            - ${NacosHasAuth}
+            - true
   VpcOption:
     Type: String
     AllowedValues:
@@ -281,10 +353,28 @@ Resources:
       CommandContent:
         Fn::Sub:
           - |
-            curl -fsSL https://higress.io/standalone/get-higress.sh | bash -s ../higress -a -r --use-builtin-nacos --nacos-port=8848 --gateway-http-port=80 --gateway-https-port=443 --gateway-metrics-port=15020 --console-port=8080
+            curl -fsSL https://higress.io/standalone/get-higress.sh | bash -s ./higress -a ${NacosConfig} 
 
             ARGUS_VERSION=3.5.7 /bin/bash -c "$(curl -sS https://cms-agent-${RegionId}.oss-${RegionId}-internal.aliyuncs.com/Argus/agent_install_ecs-1.7.sh)" >> /root/install_cms_agent.log 2>&1
-          - RegionId:
+          - NacosConfig:
+              Fn::If:
+                - UseSelfHostedNacosCondition
+                - Fn::If:
+                    - NacosHasAuthCondition
+                    - Fn::Sub:
+                        - '-c nacos://${NacosIp}:8848  --nacos-username=${NacosName}  --nacos-password=${NacosPassword}'
+                        - NacosIp:
+                            Ref: NacosHost
+                          NacosName:
+                            Ref: NacosUserName
+                          NacosPassword:
+                            Ref: NacosUserPassword
+                    - Fn::Sub:
+                        - '-c nacos://${NacosIp}:8848'
+                        - NacosIp:
+                            Ref: NacosHost
+                - ' --use-builtin-nacos'
+            RegionId:
               Ref: ALIYUN::Region
 Outputs:
   ServerAddress:
@@ -314,6 +404,14 @@ Metadata:
           - InstancePassword
         Label:
           default: 资源配置
+      - Parameters:
+          - UseSelfHostedNacos
+          - NacosHost
+          - NacosHasAuth
+          - NacosUserName
+          - NacosUserPassword
+        Label:
+          default: Nacos服务配置
       - Parameters:
           - ZoneId
           - VpcOption
