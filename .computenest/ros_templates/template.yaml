@@ -60,7 +60,7 @@ Parameters:
       en: Nacos user name.
       zh-cn: 访问Nacos服务的用户名
     Type: String
-    Default: null
+    Default: ""
     AssociationPropertyMetadata:
       Visible:
         Condition:
@@ -72,7 +72,7 @@ Parameters:
       en: Nacos user Password.
       zh-cn: 访问Nacos服务的密码
     Type: String
-    Default: null
+    Default: ""
     NoEcho: true
     AssociationPropertyMetadata:
       Visible:
@@ -204,6 +204,18 @@ Parameters:
         InstanceTypeFamily:
           - ecs.u1
           - ecs.e
+        Memory:
+          - 4
+          - 8
+          - 12
+          - 16
+          - 24
+          - 32
+          - 48
+          - 64
+          - 96
+          - 128
+          - 256
   InstancePassword:
     NoEcho: true
     Type: String
@@ -353,29 +365,22 @@ Resources:
       CommandContent:
         Fn::Sub:
           - |
-            curl -fsSL https://higress.io/standalone/get-higress.sh | bash -s ./higress -a ${NacosConfig} 
+            cd ./higress/bin
+            ./shutdown.sh 
+            
+            cd ./higress/compose
+            sed -i 's/NACOS_SERVER_URL=[^,)]*/NACOS_SERVER_URL=http://${NacosIp}:8848/naco/' .env
+            sed -i 's/NACOS_USERNAME=[^,)]*/NACOS_USERNAME=${NacosName}/' .env
+            sed -i 's/NACOS_PASSWORD=[^,)]*/NACOS_PASSWORD=${NacosPassword}/' .env
+            docker compose up -d
 
-            ARGUS_VERSION=3.5.7 /bin/bash -c "$(curl -sS https://cms-agent-${RegionId}.oss-${RegionId}-internal.aliyuncs.com/Argus/agent_install_ecs-1.7.sh)" >> /root/install_cms_agent.log 2>&1
-          - NacosConfig:
-              Fn::If:
-                - UseSelfHostedNacosCondition
-                - Fn::If:
-                    - NacosHasAuthCondition
-                    - Fn::Sub:
-                        - '-c nacos://${NacosIp}:8848  --nacos-username=${NacosName}  --nacos-password=${NacosPassword}'
-                        - NacosIp:
-                            Ref: NacosHost
-                          NacosName:
-                            Ref: NacosUserName
-                          NacosPassword:
-                            Ref: NacosUserPassword
-                    - Fn::Sub:
-                        - '-c nacos://${NacosIp}:8848'
-                        - NacosIp:
-                            Ref: NacosHost
-                - ' --use-builtin-nacos'
-            RegionId:
-              Ref: ALIYUN::Region
+          - NacosIp:
+              Ref: NacosHost
+            NacosName:
+              Ref: NacosUserName
+            NacosPassword:
+              Ref: NacosUserPassword
+
 Outputs:
   ServerAddress:
     Description:
