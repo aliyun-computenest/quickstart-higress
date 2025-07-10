@@ -10,6 +10,11 @@ Service:
           - Restart
     SupportBackup: true
   DeployMetadata:
+    SupplierDeployMetadata:
+      ArtifactRelation:
+        'higress':
+          ArtifactId: ${Artifact.EcsImage.ArtifactId}
+          ArtifactVersion: ${Artifact.EcsImage.ArtifactVersion}
     TemplateConfigs:
       - Name: 单机版
         Url: 'ros_templates/template.yaml'
