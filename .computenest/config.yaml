@@ -12,16 +12,31 @@ Service:
   DeployMetadata:
     SupplierDeployMetadata:
       ArtifactRelation:
-        'higress':
+        higress:
           ArtifactId: ${Artifact.EcsImage.ArtifactId}
-          ArtifactVersion: ${Artifact.EcsImage.ArtifactVersion}
+          ArtifactVersion: draft
+      SupplierTemplateConfigs:
+      - Name: 单机版
+        Url: ros_templates/template.yaml
+        AllowedRegions:
+        - ap-southeast-1
+        - cn-hangzhou
+        - cn-shanghai
+        - cn-beijing
+        - cn-shenzhen
     TemplateConfigs:
     - Name: 单机版
       Url: 'ros_templates/template.yaml'
-      AllowedRegions: []
+      AllowedRegions:
+      - ap-southeast-1
+      - cn-hangzhou
+      - cn-shanghai
+      - cn-beijing
+      - cn-shenzhen
   ServiceType: private
   ServiceInfo:
-    Locale: zh-CN
+  - Locale: zh-CN
+    Name: Higress网关
     ShortDescription: demo
     Image: 'resources/icons/service_logo.png'
     Softwares:
@@ -30,60 +45,29 @@ Service:
 Artifact:
   EcsImage:
     ArtifactType: EcsImage
-    ArtifactName: higress
-    Description: higress
-    ArtifactProperty:
-      RegionId: ${ImageBuilder.EcsImage.RegionId}
-      ImageId: ${ImageBuilder.EcsImage.SourceImageId}
-ImageBuilder:
-  EcsImage:
-    RegionId: ap-southeast-1
-    # 使用最新的LTS版本Alibaba Cloud Linux
-    SourceImageId: aliyun_3_x64_20G_alibase_20240819.vhd
-    SystemDiskSize: 20
-    InstanceType: ecs.c6.large
-    InternetMaxBandwidthOut: 10
-    CommandType: RunShellScript
-    Timeout: 10800
-    Tags: []
-    CommandContent: |-
-      #!/bin/bash
-      # 升级基础组件：
-      yum check-update
-      yum -y upgrade --security
-      yum -y upgrade-minimal
-
-      # 安装docker-ce
-      yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
-      yum makecache
-      yum install -y curl git docker-ce
-      mkdir -p /etc/docker/
-      echo '{
-          "default-address-pools": [
-              {
-                  "base": "10.255.0.0/16",
-                  "size": 24
-              }
-          ]
-      }' > /etc/docker/daemon.json
-
-      prefixChinaRegion="cn-"
-      region=$(curl -s http://100.100.100.200/latest/meta-data/region-id)
-
-      if [[ ${region} == ${prefixChinaRegion}* && ${region} != "cn-hongkong" ]]; then
-        echo '{
-            "default-address-pools": [
-                {
-                    "base": "10.255.0.0/16",
-                    "size": 24
-                }
-            ],
-            "registry-mirrors": [
-                "https://mirrors-ssl.aliyuncs.com/"
-            ]
-        }' > /etc/docker/daemon.json
-      fi
-
-      sudo systemctl enable --now docker.socket
-      sudo systemctl enable --now docker.service
-      curl -fsSL https://higress.io/standalone/get-higress.sh | bash -s ./higress -a --use-builtin-nacos 
+    ArtifactName: ecs_image_quickstart-higress
+    Description: quickstart-higress EcsImage
+    SupportRegionIds:
+    - ap-southeast-1
+    - cn-hangzhou
+    - cn-shanghai
+    - cn-beijing
+    - cn-shenzhen
+    ArtifactBuildProperty:
+      CodeRepo:
+        Platform: github
+        Owner: LYH-RAIN
+        RepoName: quickstart-higress
+        Branch: main
+      RegionId: ap-southeast-1
+      CommandType: RunShellScript
+      CommandContent: |-
+        #!/bin/bash
+        mkdir -p /root/application
+        
+        if [ -e "/root/code/.env" ]; then cp -r "/root/code/.env" "/root/application/"; fi
+        if [ -e "/root/code/docker-compose.yaml" ]; then cp -r "/root/code/docker-compose.yaml" "/root/application/"; fi
+        
+        cd /root/application
+        
+        curl -fsSL https://higress.io/standalone/get-higress.sh | bash -s ./higress -a --use-builtin-nacos 
