@@ -57,7 +57,7 @@ Artifact:
       CodeRepo:
         Platform: github
         Owner: LYH-RAIN
-        RepoName: quickstart-higress
+        RepoName: aliyun-computenest/quickstart-higress
         Branch: main
       RegionId: ap-southeast-1
       CommandType: RunShellScript
