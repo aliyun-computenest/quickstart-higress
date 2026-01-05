@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="计算巢是阿里云开放给企业应用服务商的服务管理平台。服务商能够在计算巢上发布私有化部署服务，为其客户提供云上软件一键部署的能力；同时也支持全托管模式的服务，赋能服务商托管其客户资源。">
+  <title>Higress deployment documentation - Aliyun 计算巢 x Demo</title>
+
+  <link rel="shortcut icon" href="../img/favicon.ico">
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+  <link rel="stylesheet" href="../css/theme.css">
+  
+
+  
+
+  
+  
+
+  
+    <script src="../search/main.js"></script>
+  
+
+  
+
+  <script src="../js/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="nav-inner">
+        <div class="logo">
+          <img src="./img/logo-2x.png">
+        </div>
+        <div class="nav-list">
+          <ul>
+          
+              <li><a href="#higress-deployment-documentation">Higress deployment documentation</a></li>
+              
+                  <li><a href="#overview">Overview</a></li>
+                  
+              
+                  <li><a href="#billing-description">Billing Description</a></li>
+                  
+              
+                  <li><a href="#deployment-architecture">Deployment Architecture</a></li>
+                  
+              
+                  <li><a href="#permissions-required-for-ram-accounts">Permissions required for RAM accounts</a></li>
+                  
+              
+                  <li><a href="#deployment-process">Deployment process</a></li>
+                  
+                      <li class="li-h3"><a href="#deployment-steps">Deployment steps</a></li>
+                  
+                      <li class="li-h3"><a href="#validation-results">Validation Results</a></li>
+                  
+              
+          
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="content theme-github">
+      
+      <div class="content-inner">        
+        
+        <h1 id="higress-deployment-documentation">Higress deployment documentation</h1>
+<h2 id="overview">Overview</h2>
+<p>Higress is a cloud native API gateway. The kernel is based on Istio and Envoy. Wasm plug-ins can be written in Go, Rust, JS, etc. It provides dozens of ready-made general plug-ins and out-of-the-box console. Higress was born in Alibaba to solve the problem of Tengine reload on long-term connection business and insufficient gRPC/Dubbo load balancing capability. Alibaba Cloud has built a cloud-native API gateway product based on the Higress, providing 99.99 percent of the gateway high availability guarantee service capabilities for a large number of enterprise customers. Based on the AI gateway capability, the Higress supports AI services such as Tongyi Thousand Questions APP, Bailian Model API, and Machine Learning PAI Platform. AIGC companies that also serve the domestic head (e. g., all things), as well as AI products (e. g., FastGPT).</p>
+<h2 id="billing-description">Billing Description</h2>
+<p>Higress expenses on computing nests relate primarily:</p>
+<p>The selected vCPU and memory specifications disk capacity public network bandwidth billing methods include:</p>
+<p>-Pay-As-You-Go (hours)
+-The estimated monthly fee can be seen in real time when the instance is created.</p>
+<p>The estimated cost can be seen in real time when the instance is created.</p>
+<h2 id="deployment-architecture">Deployment Architecture</h2>
+<p>Higress Community Edition is a stand-alone deployment architecture that is deployed independently based on the Docker Compose.</p>
+<h2 id="permissions-required-for-ram-accounts">Permissions required for RAM accounts</h2>
+<p>The One Api service needs to access and create resources such as ECS and VPC. If you use a RAM user to create a service instance, you need to add the corresponding resource permissions to the account of the RAM user before creating the service instance. For details about how to add RAM permissions, see Authorize RAM users. The required permissions are shown in the following table.</p>
+<table>
+<thead>
+<tr>
+<th>Permission policy name</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AliyunECSFullAccess</td>
+<td>Permissions to manage ECS instances</td>
+</tr>
+<tr>
+<td>AliyunVPCFullAccess</td>
+<td>Permissions to manage a VPC</td>
+</tr>
+<tr>
+<td>AliyunROSFullAccess</td>
+<td>Manage permissions for Resource Orchestration Service (ROS)</td>
+</tr>
+<tr>
+<td>AliyunComputeNestUserFullAccess</td>
+<td>Manage user-side permissions for the compute nest service (ComputeNest)</td>
+</tr>
+<tr>
+<td>AliyunCloudMonitorFullAccess</td>
+<td>Permissions to manage CloudMonitor (CloudMonitor)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="deployment-process">Deployment process</h2>
+<h3 id="deployment-steps">Deployment steps</h3>
+<ol>
+<li>Click the deployment link to enter the service instance deployment page.</li>
+<li>According to the interface prompt, fill in the parameters to complete the deployment.
+Select a resource type and configure an ECS instance password.
+<img alt="img1.png" src="../images-en/img1.jpg" />
+Configure the Nacos service. If you do not have an independently deployed Nacos service, you can use the built-in Nacos service.
+<img alt="img_2.png " src="../images-en/img2.jpg" />
+If the Nacos service is deployed independently, set the IP address of the Nacos service. If authentication is enabled for Nacos, enter the username and password.
+<img alt="img_3.png" src="../images-en/img3.png" />
+Finally, configure the zone. You can create a new VPC or use an existing VPC.
+<img alt="img_4.png" src="../images-en/img4.png" /></li>
+<li>After setting the parameters, click Next to confirm the order, click Create Now, and wait for the service instance to be created.</li>
+<li>After the service instance is successfully created, go to the service instance details page. On the Overview page, you can obtain the login information of the Higress.
+<img alt="img_5.png" src="../images-en/img5.png" /></li>
+</ol>
+<h3 id="validation-results">Validation Results</h3>
+<p>Click on the link to enter the console of the Higress, and you can start using it after logging in according to the prompt.
+<img alt="img_6.png" src="../images-en/img6.png" /></p>
+<div style="margin-top: 20px;">
+<footer>
+<p> View more computing nest services (https://computenest.aliyun.com)</p>
+</footer>
+</div>
+        
+      </div>
+
+      <div class="copyrights">© 2009-2022 Aliyun.com 版权所有</div>
+    </div>
+  </div>
+  
+  <!--
+  MkDocs version      : 1.6.1
+  Docs Build Date UTC : 2026-01-05 11:43:52.134325+00:00
+  -->
+</body>
+</html>
