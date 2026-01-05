@@ -3,11 +3,11 @@ Service:
   DeployType: ros
   OperationMetadata:
     StatusOperationConfigs:
-      - TemplateName: '单机版'
-        SupportOperations:
-          - Start
-          - Stop
-          - Restart
+    - TemplateName: '单机版'
+      SupportOperations:
+      - Start
+      - Stop
+      - Restart
     SupportBackup: true
   DeployMetadata:
     SupplierDeployMetadata:
@@ -16,14 +16,17 @@ Service:
           ArtifactId: ${Artifact.EcsImage.ArtifactId}
           ArtifactVersion: ${Artifact.EcsImage.ArtifactVersion}
     TemplateConfigs:
-      - Name: 单机版
-        Url: 'ros_templates/template.yaml'
-        AllowedRegions: []
+    - Name: 单机版
+      Url: 'ros_templates/template.yaml'
+      AllowedRegions: []
   ServiceType: private
   ServiceInfo:
     Locale: zh-CN
     ShortDescription: demo
     Image: 'resources/icons/service_logo.png'
+    Softwares:
+    - Name: higress
+      Version: v2.1.9
 Artifact:
   EcsImage:
     ArtifactType: EcsImage
@@ -42,7 +45,7 @@ ImageBuilder:
     InternetMaxBandwidthOut: 10
     CommandType: RunShellScript
     Timeout: 10800
-    Tags: [ ]
+    Tags: []
     CommandContent: |-
       #!/bin/bash
       # 升级基础组件：
