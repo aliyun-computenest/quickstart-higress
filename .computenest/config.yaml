@@ -63,4 +63,4 @@ Artifact:
       CommandType: RunShellScript
       CommandContent: |-
         #!/bin/bash
-        curl -fsSL https://higress.io/standalone/get-higress.sh | bash -s -- -a -c 1.4.2 --use-builtin-nacos 
+        curl -fsSL https://higress.io/standalone/get-higress.sh | bash -s -- -a --use-builtin-nacos 
