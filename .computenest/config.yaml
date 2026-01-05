@@ -63,11 +63,4 @@ Artifact:
       CommandType: RunShellScript
       CommandContent: |-
         #!/bin/bash
-        mkdir -p /root/application
-        
-        if [ -e "/root/code/.env" ]; then cp -r "/root/code/.env" "/root/application/"; fi
-        if [ -e "/root/code/docker-compose.yaml" ]; then cp -r "/root/code/docker-compose.yaml" "/root/application/"; fi
-        
-        cd /root/application
-        
-        curl -fsSL https://higress.io/standalone/get-higress.sh | bash -s ./higress -a --use-builtin-nacos 
+        curl -fsSL https://higress.io/standalone/get-higress.sh | bash -s -- -a -c 1.4.2 --use-builtin-nacos 
