@@ -41,7 +41,7 @@ Service:
     Image: 'resources/icons/service_logo.png'
     Softwares:
     - Name: higress
-      Version: v2.2.3
+      Version: v2.2.4
 Artifact:
   EcsImage:
     ArtifactType: EcsImage
